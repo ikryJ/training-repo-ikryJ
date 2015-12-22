@@ -1,0 +1,93 @@
+\documentclass[report,nochapters]{aaltoseries}
+\usepackage[latin1]{inputenc}
+% hack to emulate non-odd+even page layout, leaves page numbers in original places though
+\setlength{\oddsidemargin}{5mm} 
+\setlength{\evensidemargin}{5mm}
+
+% can't get to work
+%\usepackage[RGB,Teknillinen korkeakoulu,Kirjasto,Otaniemi,Coated]{aaltologo}
+
+% apparently \maketitle is not implemented in this document class. Therefore in plain text below
+\title{On the KPI process
+\author{Tuija Sonkkila}
+\date{11.5.2012}
+
+
+% start
+\begin{document}
+\AaltoLogoLarge{1}{!}{aaltoYellow}
+
+On the KPI process
+
+Tuija Sonkkila
+
+10.5.2012
+
+\tableofcontents 
+
+\section{Files, database and tables}
+
+All scripts listed below are located on the CSC Hippu server, on my sonkkila account, in the directory 
+\begin{verbatim}
+$USERAPPL/tools/aalto/prosessi
+\end{verbatim}
+and they are also shown in this report in verbatim (deleted from this version).  
+
+\begin{description}
+    \item[calc.pl] Perl script. Calculates citations counts of a given WoS list
+    \item[dofinal.pl] Perl script. Creates and populates all tables with final NCSf scores
+    \item[scores.pl] Perl script. Runs world reference values by subject
+    \item[scorescrange] Table that stores non-self citations averages of the combinations of every Wos field, year and publication type
+    \item[jfieldscorescrange] Table that stores non-self citation averages of combinations of ISSN, year, and publication type. We want to find out citation averages over all WoS fields that constitute a given journal. Journals have 1-n subject fields, so we want to calculate a total average between these fields
+    \item[aaltocrange] Table that stores all non-self citations of the given (Aalto) item run, and their NCSf values, calculated against world reference values
+    \item[aaltofrom2003to2007] Table that stores the final NCSf score by unit, in this particular time window
+\end{description}
+
+
+\section{World reference values by WoS subject}
+
+Create table scorescrange.
+
+The function of the table is to store non-self citation averages of the combinations of every WoS field, year and publication type.
+
+The Perl script scores.pl inserts lines to table scorescrange. The script and table need updating whenever new years and year ranges are calculated.
+
+The table scorescrange is then updated by sum and average fields. Note that these SQL commands could also be appended in the scores.pl but as for now, are run manually.
+
+\section{World reference values across subjects that constitute a journal}
+
+Create table jfieldscorescrange.
+
+The function of this table is to collect non-self citation averages of combinations of ISSN, year, and publication type. The goal is to find out citation averages over all WoS fields that constitute a given journal. Journals have 1-n subject fields, and we want to calculate a total average between these fields. 
+
+\section{Average citation scores}
+
+Create table aaltocrange.
+
+The function of this table is to store all non-self citations of the given Aalto item run, and their NCSf values, calculated against world reference values.
+
+The table schema needs updating whenever new years and year ranges are calculated.
+
+Prepare a CSV file of Aalto items. Example:
+
+\begin{verbatim}
+2007%ISI:000206301700007%SCI
+2007%ISI:000206312800016%ELEC
+2008%ISI:000207455000011%SCI
+2010%WOS:000208455700017%SCI
+2003%ISI:000207559200006%SCI
+\end{verbatim}
+
+The Perl script calc.pl calculates non-self citation counts of WoS items in the input file.
+
+Update table aaltocrange by counting citation sums over year ranges, and normalizing the scores against the world reference values found in table jfieldscorescrange.
+
+These SQL commands could also be included in the calc.pl script, but as for now, are run manually.
+
+Updates can now also be run by joining to the alljfieldscorescrange (see above about the table).
+
+\section{Final scores}
+
+Creates and populates final NCSf values by time window.
+
+\end{document}
